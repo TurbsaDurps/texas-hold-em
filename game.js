@@ -3,6 +3,8 @@ import { createDeck } from "./deck.js";
 
 const bgMusic = new Audio("assets/sound/main_theme.mp3");
 
+let playing = false;
+
 bgMusic.loop = true;
 bgMusic.volume = 0.4;
 bgMusic.muted = true;
@@ -12,6 +14,20 @@ bgMusic.play();
 document.addEventListener("click", () => {
   bgMusic.muted = false;
 }, { once: true });
+
+
+const playBtn = document.getElementById("play-btn")
+const titleScreen = document.getElementById("title-screen")
+const titleOverlay = document.getElementById("title-overlay")
+
+
+playBtn.addEventListener("click", () => {
+  console.log("hi :D")
+  titleOverlay.style.transform = "translateY(-100%)";
+  titleScreen.style.opacity = "0";
+  titleOverlay.classList.add("hidden")
+});
+
 
 
 const card_type = "standard_cards"
@@ -150,9 +166,3 @@ function switchbtns() {
 }
 
 console.log("game.js loaded");
-
-playgin = true;
-
-while (playgin) {
-  console.log("playing")
-}
