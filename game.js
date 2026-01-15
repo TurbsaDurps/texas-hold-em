@@ -45,7 +45,7 @@ function cardToAsset(card) {
     "cl": "clubs",
   };
 
-  return `url("assets/cards/${card.value}_of_${suitMap[card.suit]}.svg")`;
+  return `url("assets/${card.value}_of_${suitMap[card.suit]}.svg")`;
 }
 
 // ==========================
@@ -77,7 +77,7 @@ if (player.hand[1] && hand_doc2) {
 // HOUSE CARDS (BACKS)
 // ==========================
 
-const CARD_BACK = 'url("assets/cards/card_back_1.svg")';
+const CARD_BACK = 'url("assets/card_back_1.svg")';
 
 for (let i = 1; i <= HOUSE_CARD_COUNT; i++) {
   const card = document.getElementById(`house-${i}`);
