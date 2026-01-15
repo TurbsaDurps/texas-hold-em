@@ -1,0 +1,12 @@
+{
+  "name": "cs_project",
+  "version": "1.0.0",
+  "description": "This is a JS Canvas Project that calculates poker hands/ is poker.",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}

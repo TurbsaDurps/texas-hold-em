@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <base href="." />
+
+    <script type="module" src="game.js" defer></script>
+    <title>Poker</title>
+  </head>
+
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap");
+
+    * {
+      font-family: "Roboto Slab", serif;
+      overscroll-behavior: none;
+    }
+
+    body,
+    html {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    /* Global disabled button styling */
+    button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      pointer-events: none;
+
+      /* flatten depth */
+      transform: none !important;
+      border-bottom-width: 4px !important;
+
+      /* remove glow */
+      filter: grayscale(40%) brightness(0.9);
+
+      /* stop animations */
+      transition: none !important;
+    }
+
+    /* Remove hover effects when disabled */
+    button:disabled:hover {
+      transform: none !important;
+      border-bottom-width: 4px !important;
+    }
+
+    .bg-pan {
+      background-image: url("assets/background.png");
+      background-repeat: repeat-x; /* repeat horizontally */
+      background-size: cover; /* adjust if you want */
+      animation: pan 5s linear infinite;
+    }
+
+    @keyframes pan {
+      0% {
+        background-position: 0 0;
+      }
+      100% {
+        background-position: -1000px 0; /* change this to match image width / speed */
+      }
+    }
+
+    .perspective {
+      perspective: 1000px;
+    }
+    .transform-style-preserve-3d {
+      transform-style: preserve-3d;
+    }
+    .backface-hidden {
+      backface-visibility: hidden;
+    }
+    .rotate-y-180 {
+      transform: rotateY(180deg);
+    }
+    .card.flipped {
+      transform: rotateY(180deg);
+    }
+    .card {
+      outline: 500px;
+    }
+    .raise-input[type="number"] {
+      -webkit-appearance: textfield;
+      -moz-appearance: textfield;
+      appearance: textfield;
+    }
+
+    .raise-input[type="number"]::-webkit-inner-spin-button,
+    .raise-input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+    }
+  </style>
+
+  <body class="p-0 m-0 overflow-clip">
+    <!-- game -->
+    <div
+      class="w-full h-screen bg-zinc-900 relative flex flex-col items-center justify-between overflow-hidden select-none"
+    >
+      <div class="absolute top-0 right-0 p-2 flex gap-4 z-99">
+        <button><svg class="w-6 h-6 cursor-pointer text-white/20 hover:-rotate-10 hover:text-white scale-120 duraiton-500 transition-all" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume2-icon lucide-volume-2"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/></svg></button>
+        <button><svg class="w-6 h-6 cursor-pointer text-white/20 hover:scale-[120%] hover:text-white scale-120 duraiton-500 transition-all" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-icon lucide-scan"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg></button>
+
+      </div>
+      <div class="absolute inset-0 bg-pan opacity-5"></div>
+      <!-- <div class="absolute z-99 top-0 p-4 bg-linear-to-b from-black to-transparent  w-full flex items-center justify-center">
+        <input type="range" min="0" max="100" value="50" class="w-1/2 raise-input" />
+      </div> -->
+      <div class="absolute inset-0 bg-rose-200 opacity-5"></div>
+      <div class="h-1/4 w-full"></div>
+
+      <div
+        class="absolute top-4 p-2 gap-2 flex flex-col items-center justify-center"
+      >
+        <svg
+          class="text-white"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="lucide lucide-chevron-up-icon lucide-chevron-up"
+        >
+          <path d="m18 15-6-6-6 6" />
+        </svg>
+        <div class="flex">
+          <div
+            class="bg-no-repeat bg-cover bg-[url('assets/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border -rotate-10"
+          ></div>
+          <div
+            class="bg-no-repeat bg-cover bg-[url('assets/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border rotate-10"
+          ></div>
+        </div>
+
+        <h1 class="text-white hover:scale-120 duration-500 transition-all">player2 • ※1205p</h1>
+      </div>
+      <div
+        class="absolute right-4 top-1/3 p-2 gap-2 z-98 flex flex-row-reverse items-center justify-center"
+      >
+        <svg
+          class="text-white rotate-90"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="lucide lucide-chevron-up-icon lucide-chevron-up"
+        >
+          <path d="m18 15-6-6-6 6" />
+        </svg>
+        <div class="flex flex-col items-center justify-center gap-2">
+          <div class="flex">
+            <div
+              class="bg-no-repeat bg-cover bg-[url('assets/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border -rotate-10"
+            ></div>
+            <div
+              class="bg-no-repeat bg-cover bg-[url('assets/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border rotate-10"
+            ></div>
+          </div>
+          <h1 class="text-white hover:scale-120 duration-500 transition-all">player3 • ※1205p</h1>
+
+        </div>
+        
+      </div>
+      <div
+        class="absolute left-4 top-1/3 p-2 gap-2 z-98 flex items-center justify-center"
+      >
+        <svg
+          class="text-white -rotate-90"
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="lucide lucide-chevron-up-icon lucide-chevron-up"
+        >
+          <path d="m18 15-6-6-6 6" />
+        </svg>
+        <div class="flex flex-col items-center justify-center gap-2">
+          <div class="flex">
+            <div
+              class="bg-no-repeat bg-cover bg-[url('assets/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border -rotate-10"
+            ></div>
+            <div
+              class="bg-no-repeat bg-cover bg-[url('assets/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border rotate-10"
+            ></div>
+          </div>
+          <h1 class="text-white hover:scale-120 duration-500 transition-all">player1 • ※1205p</h1>
+
+        </div>
+      </div>
+
+      <div
+        class="w-full h-full flex flex-col items-center justify-center relative"
+      >
+        <div
+          class="w-full flex items-center gap-2 justify-center pb-2 absolute top-[100px]"
+        >
+          <h1 class="text-xl text-white">※1295p</h1>
+          <h1
+            class="font-bold text-2xl text-white hover:scale-105 duration-500 transition-all"
+          >
+            + ※500p
+          </h1>
+        </div>
+        <div class="flex items-center justify-center gap-4">
+          <div
+            class="w-[180px] h-[260px] perspective cursor-pointer hover:-translate-y-2 duration-500 transition-all"
+            onclick="this.querySelector('.card').classList.toggle('flipped')"
+          >
+            <div
+              class="card relative w-full h-full transition-transform duration-500 transform-style-preserve-3d ring-white rounded-lg"
+            >
+              <div
+                id="house-1"
+                class="absolute w-full h-full bg-white rounded-xl shadow-lg flex items-center justify-center text-xl font-bold backface-hidden"
+              ></div>
+              <div
+                id="house-1-front"
+                class="absolute w-full h-full rounded-xl flex items-center justify-center text-white text-2xl font-bold backface-hidden rotate-y-180"
+              ></div>
+            </div>
+          </div>
+          <div
+            class="w-[180px] h-[260px] perspective cursor-pointer hover:-translate-y-2 duration-500 transition-all"
+            onclick="this.querySelector('.card').classList.toggle('flipped')"
+          >
+            <div
+              class="card relative w-full h-full transition-transform duration-500 transform-style-preserve-3d ring-3 ring-black rounded-lg"
+            >
+              <div
+                id="house-2"
+                class="absolute w-full h-full bg-white rounded-xl shadow-lg flex items-center justify-center text-xl font-bold backface-hidden"
+              ></div>
+              <div
+                id="house-2-front"
+                class="absolute w-full h-full rounded-xl flex items-center justify-center text-white text-2xl font-bold backface-hidden rotate-y-180"
+              ></div>
+            </div>
+          </div>
+          <div
+            class="w-[180px] h-[260px] perspective cursor-pointer hover:-translate-y-2 duration-500 transition-all"
+            onclick="this.querySelector('.card').classList.toggle('flipped')"
+          >
+            <div
+              class="card relative w-full h-full transition-transform duration-500 transform-style-preserve-3d ring-3 ring-black rounded-lg"
+            >
+              <div
+                id="house-3"
+                class="absolute w-full h-full bg-white rounded-xl shadow-lg flex items-center justify-center text-xl font-bold backface-hidden"
+              ></div>
+              <div
+                id="house-3-front"
+                class="absolute w-full h-full rounded-xl flex items-center justify-center text-white text-2xl font-bold backface-hidden rotate-y-180"
+              ></div>
+            </div>
+          </div>
+          <div
+            class="w-[180px] h-[260px] perspective cursor-pointer hover:-translate-y-2 duration-500 transition-all"
+            onclick="this.querySelector('.card').classList.toggle('flipped')"
+          >
+            <div
+              class="card relative w-full h-full transition-transform duration-500 transform-style-preserve-3d ring-3 ring-black rounded-lg"
+            >
+              <div
+                id="house-4"
+                class="absolute w-full h-full bg-white rounded-xl shadow-lg flex items-center justify-center text-xl font-bold backface-hidden"
+              ></div>
+              <div
+                id="house-4-front"
+                class="absolute w-full h-full rounded-xl flex items-center justify-center text-white text-2xl font-bold backface-hidden rotate-y-180"
+              ></div>
+            </div>
+          </div>
+          <div
+            class="w-[180px] h-[260px] perspective cursor-pointer hover:-translate-y-2 duration-500 transition-all"
+            onclick="this.querySelector('.card').classList.toggle('flipped')"
+          >
+            <div
+              class="card relative w-full h-full transition-transform duration-500 transform-style-preserve-3d ring-3 ring-black rounded-lg"
+            >
+              <div
+                id="house-5"
+                class="absolute w-full h-full bg-white rounded-xl shadow-lg flex items-center justify-center text-xl font-bold backface-hidden"
+              ></div>
+              <div
+                id="house-5-front"
+                class="absolute w-full h-full rounded-xl flex items-center justify-center text-white text-2xl font-bold backface-hidden rotate-y-180"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="w-full h-1/4 py-4 relative">
+        <div
+          class="absolute bottom-[50%] w-full flex items-center justify-center gap-2"
+        >
+          <div
+            id="hand-1"
+            class="card p-2 cursor-pointer rounded-xl hover:-translate-y-10 transition-all duration-500 bg-white w-[250px] h-[360px] shadow-xl ring-5 ring-offset-4 ring-offset-white border -rotate-10"
+          ></div>
+          <div
+            id="hand-2"
+            class="card p-2 cursor-pointer rounded-xl hover:-translate-y-10 transition-all duration-500 bg-white w-[250px] h-[360px] shadow-xl w-32 h-48 bg-white rounded-xl ring-5 ring-offset-4 ring-offset-white border rotate-10"
+          ></div>
+        </div>
+        <div class="relative w-full z-99 flex items-end justify-center gap-8">
+          <button
+            id="btn-fold"
+            class="p-8 ring-2 ring-black border-b-8 border border-zinc-300 bg-zinc-100 text-2xl font-bold text-zinc-400 transition-all duration-500 hover:-translate-y-2 px-20 border rounded-xl bg-white cursor-pointer"
+          >
+            FOLD
+          </button>
+
+          <div class="relative flex items-end">
+            <!-- <button
+              id="btn-raise"
+              class="p-10 cursor-not-allowed absolute bottom-0 rounded-br-none ring-2 ring-emerald-500 border-b-24 hover:border-b-10 border-emerald-500 bg-emerald-400 px-24 border transition-all duration-500 rounded-xl font-bold text-3xl text-emerald-200 relative cursor-pointer"
+            >
+              <h1 class="absolute z-99 peer-focus:bg-red-300">RAISE</h1>
+              <input type="text" class="peer focus:outline-none border-none w-full h-full ">
+            </button>     -->
+            <button
+              id="btn-raise"
+              type="button"
+              class="p-10 cursor-not-allowed absolute bottom-0 rounded-br-none ring-2 ring-emerald-500 border-b-24 hover:border-b-10 border-emerald-500 bg-emerald-400 px-24 border transition-all duration-500 rounded-xl font-bold text-3xl text-emerald-200 relative cursor-pointer"
+            >
+              <!-- INPUT (peer must come FIRST) -->
+              <input
+                type="text"
+                class="peer selection:bg-blue-300/60  absolute inset-0 bg-transparent text-center text-emerald-200 focus:outline-none border-none opacity-0 focus:opacity-100"
+              />
+
+              <!-- LABEL -->
+              <h1
+                class="absolute inset-0 flex items-center justify-center pointer-events-none peer-focus:hidden"
+              >
+              ※RAISE
+              </h1>
+            </button>
+
+            <button
+              id="btn-allin"
+              class="p-10 cursor-not-allowed ring-2 rounded-bl-none ring-red-500 border-b-24 hover:border-b-10 border-red-500 bg-red-400 px-24 border transition-all duration-500 rounded-xl font-bold text-3xl text-red-200 relative cursor-pointer"
+            >
+            ※ALL IN※
+            </button>
+          </div>
+
+          <button
+            id="btn-fold"
+            class="p-8 cursor-not-allowed ring-2 ring-black border-b-8 border border-amber-300 bg-amber-100 text-2xl font-bold text-amber-400 transition-all duration-500 hover:-translate-y-2 px-20 border rounded-xl cursor-pointer"
+          >
+            CALL
+          </button>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script>
+    const raiseBtn = document.getElementById("btn-raise");
+    const raiseInput = document.getElementById("raise-input");
+    const raiseLabel = document.getElementById("raise-label");
+
+    raiseBtn.addEventListener("click", () => {
+      raiseLabel.classList.add("hidden");
+      raiseInput.classList.remove("hidden");
+      raiseInput.focus();
+    });
+
+    raiseInput.addEventListener("blur", () => {
+      if (raiseInput.value === "") {
+        raiseLabel.classList.remove("hidden");
+        raiseInput.classList.add("hidden");
+      }
+    });
+  </script>
+</html>

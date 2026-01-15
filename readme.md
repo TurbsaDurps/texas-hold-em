@@ -1,0 +1,1 @@
+This is a JS Canvas Project that calculates poker hands/ is poker.
