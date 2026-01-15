@@ -304,6 +304,8 @@ export class TableUI {
       for (const card of this.playerCards) {
         if (!card) continue;
         card.style.filter = filterValue;
+        card.style.opacity = "50%"
+
       }
       return;
     }
@@ -312,6 +314,8 @@ export class TableUI {
     for (const card of cards) {
       if (!card) continue;
       card.style.filter = filterValue;
+      card.style.opacity = "50%"
+
     }
   }
 
