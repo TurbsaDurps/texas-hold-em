@@ -100,9 +100,39 @@
   </style>
 
   <body class="p-0 m-0 overflow-clip">
-    <div class="w-full h-full bg-neutral-900 z-100 absolute hidden">
-      <div class="w-full h-full flex items-center justify-center">
-        <h1 class="font-black text-white text-9xl drop-shadow-[0_1.2px_1.2px_rgba(153,153,153,0.8)]">POKER</h1>
+    <div class="w-full h-full bg-neutral-900 z-100 absolute">
+      <div class="w-full h-full flex items-center justify-center relative">
+        <div class="absolute inset-0 bg-pan opacity-5"></div>
+        <!-- <div class="absolute z-99 top-0 p-4 bg-linear-to-b from-black to-transparent  w-full flex items-center justify-center">
+          <input type="range" min="0" max="100" value="50" class="w-1/2 raise-input" />
+        </div> -->
+        <div class="absolute inset-0 bg-rose-200 opacity-5"></div>
+        <div class="flex -gap-10 items-end translate-y-[-50px]">
+          <img
+            src="/assets/logo.svg"
+            class="w-[600px] h-[1000px]"
+          />
+        </div>
+
+        <div
+          class="absolute z-99 flex flex-col items-center justify-center gap-3"
+        >
+          <h1
+            class="font-black text-white text-9xl drop-shadow-[0_1.2px_1.2px_rgba(66,135,245,0.8)] z-99"
+          >
+            POKER
+          </h1>
+          <button
+            class="p-4 ring-2 ring-black border-b-8 border border-zinc-300 bg-zinc-100 text-2xl font-bold text-zinc-400 transition-all duration-500 hover:-translate-y-2 px-20 border rounded-xl bg-white cursor-pointer"
+          >
+            PLAY
+          </button>
+          <button
+            class="p-4 ring-2 ring-black border-b-8 border border-zinc-300 bg-zinc-100 text-2xl font-bold text-zinc-400 transition-all duration-500 hover:-translate-y-2 px-8 border rounded-xl bg-white cursor-pointer"
+          >
+            SETTINGS
+          </button>
+        </div>
       </div>
     </div>
     <!-- game -->
@@ -110,15 +140,53 @@
       class="w-full h-screen bg-zinc-900 relative flex flex-col items-center justify-between overflow-hidden select-none"
     >
       <div class="absolute top-0 right-0 p-2 flex gap-4 z-99">
-        <button><svg class="w-6 h-6 cursor-pointer text-white/20 hover:-rotate-10 hover:text-white scale-120 duraiton-500 transition-all" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-volume2-icon lucide-volume-2"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/></svg></button>
-        <button><svg class="w-6 h-6 cursor-pointer text-white/20 hover:scale-[120%] hover:text-white scale-120 duraiton-500 transition-all" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-scan-icon lucide-scan"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg></button>
-
+        <button>
+          <svg
+            class="w-6 h-6 cursor-pointer text-white/20 hover:-rotate-10 hover:text-white scale-120 duraiton-500 transition-all"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-volume2-icon lucide-volume-2"
+          >
+            <path
+              d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"
+            />
+            <path d="M16 9a5 5 0 0 1 0 6" />
+            <path d="M19.364 18.364a9 9 0 0 0 0-12.728" />
+          </svg>
+        </button>
+        <button>
+          <svg
+            class="w-6 h-6 cursor-pointer text-white/20 hover:scale-[120%] hover:text-white scale-120 duraiton-500 transition-all"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="lucide lucide-scan-icon lucide-scan"
+          >
+            <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+            <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+            <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+            <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+          </svg>
+        </button>
       </div>
       <div class="absolute inset-0 bg-pan opacity-5"></div>
       <!-- <div class="absolute z-99 top-0 p-4 bg-linear-to-b from-black to-transparent  w-full flex items-center justify-center">
         <input type="range" min="0" max="100" value="50" class="w-1/2 raise-input" />
       </div> -->
-      <div class="absolute inset-0 bg-rose-200 opacity-5"></div>
+      <div class="absolute inset-0 bg-emerald-200 opacity-5"></div>
       <div class="h-1/4 w-full"></div>
 
       <div
@@ -141,14 +209,16 @@
         </svg>
         <div class="flex">
           <div
-            class="bg-no-repeat bg-cover bg-[url('assets/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border -rotate-10"
+            class="bg-no-repeat bg-cover bg-[url('assets/standard_cards/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border -rotate-10"
           ></div>
           <div
-            class="bg-no-repeat bg-cover bg-[url('assets/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border rotate-10"
+            class="bg-no-repeat bg-cover bg-[url('assets/standard_cards/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border rotate-10"
           ></div>
         </div>
 
-        <h1 class="text-white hover:scale-120 duration-500 transition-all">player2 • ※1205p</h1>
+        <h1 class="text-white hover:scale-120 duration-500 transition-all">
+          player2 • ※1205p
+        </h1>
       </div>
       <div
         class="absolute right-4 top-1/3 p-2 gap-2 z-98 flex flex-row-reverse items-center justify-center"
@@ -171,16 +241,16 @@
         <div class="flex flex-col items-center justify-center gap-2">
           <div class="flex">
             <div
-              class="bg-no-repeat bg-cover bg-[url('assets/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border -rotate-10"
+              class="bg-no-repeat bg-cover bg-[url('assets/standard_cards/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border -rotate-10"
             ></div>
             <div
-              class="bg-no-repeat bg-cover bg-[url('assets/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border rotate-10"
+              class="bg-no-repeat bg-cover bg-[url('assets/standard_cards/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border rotate-10"
             ></div>
           </div>
-          <h1 class="text-white hover:scale-120 duration-500 transition-all">player3 • ※1205p</h1>
-
+          <h1 class="text-white hover:scale-120 duration-500 transition-all">
+            player3 • ※1205p
+          </h1>
         </div>
-        
       </div>
       <div
         class="absolute left-4 top-1/3 p-2 gap-2 z-98 flex items-center justify-center"
@@ -203,14 +273,15 @@
         <div class="flex flex-col items-center justify-center gap-2">
           <div class="flex">
             <div
-              class="bg-no-repeat bg-cover bg-[url('assets/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border -rotate-10"
+              class="bg-no-repeat bg-cover bg-[url('assets/standard_cards/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border -rotate-10"
             ></div>
             <div
-              class="bg-no-repeat bg-cover bg-[url('assets/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border rotate-10"
+              class="bg-no-repeat bg-cover bg-[url('assets/standard_cards/card_back_1.svg')] p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border rotate-10"
             ></div>
           </div>
-          <h1 class="text-white hover:scale-120 duration-500 transition-all">player1 • ※1205p</h1>
-
+          <h1 class="text-white hover:scale-120 duration-500 transition-all">
+            player1 • ※1205p
+          </h1>
         </div>
       </div>
 
@@ -353,14 +424,14 @@
               <!-- INPUT (peer must come FIRST) -->
               <input
                 type="text"
-                class="peer selection:bg-blue-300/60  absolute inset-0 bg-transparent text-center text-emerald-200 focus:outline-none border-none opacity-0 focus:opacity-100"
+                class="peer selection:bg-blue-300/60 absolute inset-0 bg-transparent text-center text-emerald-200 focus:outline-none border-none opacity-0 focus:opacity-100"
               />
 
               <!-- LABEL -->
               <h1
                 class="absolute inset-0 flex items-center justify-center pointer-events-none peer-focus:hidden"
               >
-              ※RAISE
+                ※RAISE
               </h1>
             </button>
 
@@ -368,7 +439,7 @@
               id="btn-allin"
               class="p-10 cursor-not-allowed ring-2 rounded-bl-none ring-red-500 border-b-24 hover:border-b-10 border-red-500 bg-red-400 px-24 border transition-all duration-500 rounded-xl font-bold text-3xl text-red-200 relative cursor-pointer"
             >
-            ※ALL IN※
+              ※ALL IN※
             </button>
           </div>
 

@@ -1,5 +1,21 @@
 import { createDeck } from "./deck.js";
 
+
+const bgMusic = new Audio("assets/sound/main_theme.mp3");
+
+bgMusic.loop = true;
+bgMusic.volume = 0.4;
+bgMusic.muted = true;
+
+bgMusic.play();
+
+document.addEventListener("click", () => {
+  bgMusic.muted = false;
+}, { once: true });
+
+
+const card_type = "standard_cards"
+
 // ==========================
 // DECK / DEAL LOGIC
 // ==========================
@@ -45,7 +61,7 @@ function cardToAsset(card) {
     "cl": "clubs",
   };
 
-  return `url("assets/${card.value}_of_${suitMap[card.suit]}.svg")`;
+  return `url("assets/${card_type}/${card.value}_of_${suitMap[card.suit]}.svg")`;
 }
 
 // ==========================
@@ -77,7 +93,7 @@ if (player.hand[1] && hand_doc2) {
 // HOUSE CARDS (BACKS)
 // ==========================
 
-const CARD_BACK = 'url("assets/card_back_1.svg")';
+const CARD_BACK = `url("assets/${card_type}/card_back_1.svg")`;
 
 for (let i = 1; i <= HOUSE_CARD_COUNT; i++) {
   const card = document.getElementById(`house-${i}`);
