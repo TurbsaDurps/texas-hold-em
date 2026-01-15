@@ -20,6 +20,19 @@ const btnFold = document.getElementById("btn-fold");
 const btnCall = document.getElementById("btn-call");
 const btnRaise = document.getElementById("btn-raise");
 const btnAllIn = document.getElementById("btn-allin");
+const playBtn = document.getElementById("play-btn")
+
+const titleOverlay = document.getElementById("title-overlay")
+const titleScreen = document.getElementById("title-screen")
+
+if (playBtn) {
+  playBtn.addEventListener("click", () => {
+    console.log('hi')
+    titleOverlay.classList.add("hidden")
+    titleScreen.classList.add("hidden")
+  });
+ 
+}
 
 if (btnNewHand) {
   btnNewHand.addEventListener("click", () => controller.startHand());
