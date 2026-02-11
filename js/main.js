@@ -15,59 +15,48 @@ ui.updatePot(0, "");
 const controller = new GameController(state, ui, config, new NpcBrain());
 controller.updateButtonState();
 
-const btnNewHand = document.getElementById("btn-newhand");
-const btnFold = document.getElementById("btn-fold");
-const btnCall = document.getElementById("btn-call");
-const btnRaise = document.getElementById("btn-raise");
-const btnAllIn = document.getElementById("btn-allin");
-const playBtn = document.getElementById("play-btn")
+const playBtn = document.getElementById("play-btn");
 
-const titleOverlay = document.getElementById("title-overlay")
-const titleScreen = document.getElementById("title-screen")
+const titleOverlay = document.getElementById("title-overlay");
+const titleScreen = document.getElementById("title-screen");
+
+let gameStarted = false;
+
+function startGameIfNeeded() {
+  if (gameStarted) return;
+  gameStarted = true;
+  controller.startHand();
+}
+
+function queueAction(action) {
+  ui.hideRaisePanel();
+  controller.queuePlayerAction(action);
+}
+
+function bindClick(id, handler) {
+  const element = document.getElementById(id);
+  if (!element) return;
+  element.addEventListener("click", handler);
+}
 
 if (playBtn) {
   playBtn.addEventListener("click", () => {
-    console.log('hi')
-    titleOverlay.classList.add("hidden")
-    titleScreen.classList.add("hidden")
+    titleOverlay?.classList.add("hidden");
+    titleScreen?.classList.add("hidden");
+    startGameIfNeeded();
   });
- 
+} else {
+  startGameIfNeeded();
 }
 
-if (btnNewHand) {
-  btnNewHand.addEventListener("click", () => controller.startHand());
-}
-
-if (btnFold) {
-  btnFold.addEventListener("click", () => {
-    ui.hideRaisePanel();
-    controller.queuePlayerAction({ action: "fold" });
-  });
-}
-
-if (btnCall) {
-  btnCall.addEventListener("click", () => {
-    ui.hideRaisePanel();
-    controller.queuePlayerAction({ action: "call" });
-  });
-}
-
-if (btnRaise) {
-  btnRaise.addEventListener("click", () => {
-    if (!ui.isRaisePanelOpen()) {
-      ui.showRaisePanel();
-      return;
-    }
-    ui.hideRaisePanel();
-    controller.queuePlayerAction({ action: "raise", raiseBy: ui.getRaiseValue() });
-  });
-}
-
-if (btnAllIn) {
-  btnAllIn.addEventListener("click", () => {
-    ui.hideRaisePanel();
-    controller.queuePlayerAction({ action: "allin" });
-  });
-}
-
-controller.startHand();
+bindClick("btn-newhand", () => controller.startHand());
+bindClick("btn-fold", () => queueAction({ action: "fold" }));
+bindClick("btn-call", () => queueAction({ action: "call" }));
+bindClick("btn-raise", () => {
+  if (!ui.isRaisePanelOpen()) {
+    ui.showRaisePanel();
+    return;
+  }
+  queueAction({ action: "raise", raiseBy: ui.getRaiseValue() });
+});
+bindClick("btn-allin", () => queueAction({ action: "allin" }));

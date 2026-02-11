@@ -3,6 +3,8 @@ import { bestScore } from "../core/evaluator.js";
 import { takeChips } from "./state.js";
 import { estimateAllInOdds } from "./odds.js";
 
+const STAGE_ORDER = ["preflop", "flop", "turn", "river"];
+
 export class GameController {
   constructor(state, ui, config, npcBrain) {
     this.state = state;
@@ -66,6 +68,19 @@ export class GameController {
 
   updateButtonState() {
     const player = this.state.players[0];
+    if (!player) {
+      this.ui.setButtonsEnabled({
+        canFold: false,
+        canCall: false,
+        canRaise: false,
+        canAllIn: false,
+        callLabel: "CALL",
+        raiseLabel: "※RAISE",
+      });
+      this.ui.setRaiseRange(0, 0, 0, this.config.smallBlind);
+      return;
+    }
+
     const callAmount = Math.max(0, this.state.currentBet - player.currentBet);
     const isPlayerTurn = this.pendingActionResolver != null;
     const canRaise = isPlayerTurn && this.canRaise(player);
@@ -101,35 +116,27 @@ export class GameController {
   }
 
   async dealFlop() {
-    this.state.burnPile.push(this.state.deck.pop());
-    this.ui.updateBurnPile(this.state.burnPile.length);
-    const cards = [];
-    for (let i = 0; i < 3; i += 1) {
-      const card = this.state.deck.pop();
-      this.state.communityCards[i] = card;
-      cards.push({ index: i, card });
-    }
-    await this.ui.dealCommunity(cards, this.config.dealDelayMs, () => this.updateAllInOdds());
+    await this.dealStreet([0, 1, 2]);
   }
 
   async dealTurn() {
-    this.state.burnPile.push(this.state.deck.pop());
-    this.ui.updateBurnPile(this.state.burnPile.length);
-    const card = this.state.deck.pop();
-    this.state.communityCards[3] = card;
-    await this.ui.dealCommunity([{ index: 3, card }], this.config.dealDelayMs, () =>
-      this.updateAllInOdds()
-    );
+    await this.dealStreet([3]);
   }
 
   async dealRiver() {
+    await this.dealStreet([4]);
+  }
+
+  async dealStreet(indices) {
     this.state.burnPile.push(this.state.deck.pop());
     this.ui.updateBurnPile(this.state.burnPile.length);
-    const card = this.state.deck.pop();
-    this.state.communityCards[4] = card;
-    await this.ui.dealCommunity([{ index: 4, card }], this.config.dealDelayMs, () =>
-      this.updateAllInOdds()
-    );
+    const cards = [];
+    for (const index of indices) {
+      const card = this.state.deck.pop();
+      this.state.communityCards[index] = card;
+      cards.push({ index, card });
+    }
+    await this.ui.dealCommunity(cards, this.config.dealDelayMs, () => this.updateAllInOdds());
   }
 
   async runBettingRound(startIndex) {
@@ -141,21 +148,12 @@ export class GameController {
     let currentIndex = startIndex;
     let actionsPending = this.state.actingPlayers().length;
 
-    if (actionsPending === 0) {
-      this.showAllInOdds();
-      await this.runOutRemaining();
+    if (actionsPending === 0 || (await this.resolveRoundEarlyExit())) {
       return;
     }
 
     while (true) {
-      if (this.state.activePlayers().length <= 1) {
-        this.awardPotByFold();
-        return;
-      }
-
-      if (this.state.actingPlayers().length === 0) {
-        this.showAllInOdds();
-        await this.runOutRemaining();
+      if (await this.resolveRoundEarlyExit()) {
         return;
       }
 
@@ -188,14 +186,7 @@ export class GameController {
         await sleep(this.config.npcThinkDelayMs);
       }
 
-      if (this.state.activePlayers().length <= 1) {
-        this.awardPotByFold();
-        return;
-      }
-
-      if (this.state.actingPlayers().length === 0) {
-        this.showAllInOdds();
-        await this.runOutRemaining();
+      if (await this.resolveRoundEarlyExit()) {
         return;
       }
 
@@ -212,6 +203,19 @@ export class GameController {
       return;
     }
     await this.advanceStage();
+  }
+
+  async resolveRoundEarlyExit() {
+    if (this.state.activePlayers().length <= 1) {
+      this.awardPotByFold();
+      return true;
+    }
+    if (this.state.actingPlayers().length === 0) {
+      this.showAllInOdds();
+      await this.runOutRemaining();
+      return true;
+    }
+    return false;
   }
 
   showAllInOdds() {
@@ -262,8 +266,9 @@ export class GameController {
     const seat = this.state.players.indexOf(player);
     const callAmount = Math.max(0, this.state.currentBet - player.currentBet);
     const maxTotalBet = player.currentBet + player.chips;
+    const actionType = action?.action || "call";
 
-    switch (action.action) {
+    switch (actionType) {
       case "fold":
         player.folded = true;
         player.lastAction = "folds";
@@ -347,50 +352,47 @@ export class GameController {
   }
 
   async advanceStage() {
-    if (this.state.stage === "preflop") {
-      this.state.clearBets();
-      this.ui.clearBetIndicators();
-      this.state.stage = "flop";
-      await this.dealFlop();
-      await this.runBettingRound(this.getPostFlopStart());
-      return;
-    }
-    if (this.state.stage === "flop") {
-      this.state.clearBets();
-      this.ui.clearBetIndicators();
-      this.state.stage = "turn";
-      await this.dealTurn();
-      await this.runBettingRound(this.getPostFlopStart());
-      return;
-    }
-    if (this.state.stage === "turn") {
-      this.state.clearBets();
-      this.ui.clearBetIndicators();
-      this.state.stage = "river";
-      await this.dealRiver();
-      await this.runBettingRound(this.getPostFlopStart());
-      return;
-    }
     if (this.state.stage === "river") {
       await this.resolveShowdown();
+      return;
     }
+
+    this.state.clearBets();
+    this.ui.clearBetIndicators();
+    this.state.stage = this.getNextStage(this.state.stage);
+    await this.dealCurrentStage();
+    await this.runBettingRound(this.getPostFlopStart());
   }
 
   async runOutRemaining() {
     this.ui.clearBetIndicators();
-    if (this.state.stage === "preflop") {
-      this.state.stage = "flop";
-      await this.dealFlop();
-    }
-    if (this.state.stage === "flop") {
-      this.state.stage = "turn";
-      await this.dealTurn();
-    }
-    if (this.state.stage === "turn") {
-      this.state.stage = "river";
-      await this.dealRiver();
+    while (this.state.stage !== "river") {
+      this.state.stage = this.getNextStage(this.state.stage);
+      await this.dealCurrentStage();
     }
     await this.resolveShowdown();
+  }
+
+  getNextStage(stage) {
+    const index = STAGE_ORDER.indexOf(stage);
+    if (index < 0 || index >= STAGE_ORDER.length - 1) {
+      return "river";
+    }
+    return STAGE_ORDER[index + 1];
+  }
+
+  async dealCurrentStage() {
+    if (this.state.stage === "flop") {
+      await this.dealFlop();
+      return;
+    }
+    if (this.state.stage === "turn") {
+      await this.dealTurn();
+      return;
+    }
+    if (this.state.stage === "river") {
+      await this.dealRiver();
+    }
   }
 
   awardPotByFold() {
@@ -457,14 +459,12 @@ export class GameController {
 
   postBlinds() {
     const interval = Math.max(1, this.config.blindIncreaseHands);
-    const level = Math.max(0, Math.floor((this.state.handCount) / interval));
+    const level = Math.max(0, Math.floor(this.state.handCount / interval));
     this.smallBlind = this.config.smallBlind * (1 << level);
     this.bigBlind = Math.max(this.config.bigBlind * (1 << level), this.smallBlind * 2);
 
-    const playerCount = this.state.players.length;
-    const dealerPos = this.state.dealerIndex % playerCount;
-    const smallIndex = this.seatOrder[(dealerPos + 1) % playerCount];
-    const bigIndex = this.seatOrder[(dealerPos + 2) % playerCount];
+    const smallIndex = this.getSeatAtDealerOffset(1);
+    const bigIndex = this.getSeatAtDealerOffset(2);
     this.state.postBlind(smallIndex, this.smallBlind);
     this.state.postBlind(bigIndex, this.bigBlind);
     this.ui.setBetAmount(smallIndex, this.state.players[smallIndex].currentBet);
@@ -473,24 +473,28 @@ export class GameController {
 
   getDealOrder() {
     const count = this.state.players.length;
-    const dealerPos = this.state.dealerIndex % count;
     const order = [];
     for (let i = 1; i <= count; i += 1) {
-      order.push(this.seatOrder[(dealerPos + i) % count]);
+      order.push(this.getSeatAtDealerOffset(i));
     }
     return order;
   }
 
   getPreFlopStart() {
-    const count = this.state.players.length;
-    const dealerPos = this.state.dealerIndex % count;
-    return this.seatOrder[(dealerPos + 3) % count];
+    return this.getSeatAtDealerOffset(3);
   }
 
   getPostFlopStart() {
+    return this.getSeatAtDealerOffset(1);
+  }
+
+  getSeatAtDealerOffset(offset) {
     const count = this.state.players.length;
+    if (!count || !this.seatOrder.length) {
+      return 0;
+    }
     const dealerPos = this.state.dealerIndex % count;
-    return this.seatOrder[(dealerPos + 1) % count];
+    return this.seatOrder[(dealerPos + offset) % count];
   }
 
   nextPlayerIndex(current) {
@@ -503,11 +507,12 @@ export class GameController {
   }
 
   canRaise(player) {
-    if (this.hasAnyAllIn()) return false;
     const callAmount = Math.max(0, this.state.currentBet - player.currentBet);
-    if (player.chips <= callAmount) return false;
-    if (this.raiseCount >= this.config.maxRaisesPerRound) return false;
-    return true;
+    return (
+      !this.hasAnyAllIn() &&
+      player.chips > callAmount &&
+      this.raiseCount < this.config.maxRaisesPerRound
+    );
   }
 
   hasAnyAllIn() {
@@ -515,8 +520,7 @@ export class GameController {
   }
 
   getDealerSeat() {
-    if (!this.seatOrder.length) return 0;
-    return this.seatOrder[this.state.dealerIndex % this.seatOrder.length];
+    return this.getSeatAtDealerOffset(0);
   }
 
   buildSeatOrder() {

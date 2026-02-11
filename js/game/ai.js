@@ -1,4 +1,4 @@
-import { createDeck, cardKey } from "../core/cards.js";
+import { createDeckExcluding, shuffle } from "../core/cards.js";
 import { bestScore } from "../core/evaluator.js";
 import { clamp } from "../core/utils.js";
 
@@ -10,90 +10,86 @@ export const NPC_CLASSES = [
   "LOOSE_AGGRESSIVE",
 ];
 
+const PROFILE_MIN = 0.05;
+const PROFILE_MAX = 0.98;
+
+const DIFFICULTY_PROFILES = {
+  easy: {
+    smartness: 0.35,
+    braveness: 0.35,
+    bluffFactor: 0.25,
+    discipline: 0.35,
+    stackAwareness: 0.35,
+  },
+  normal: {
+    smartness: 0.55,
+    braveness: 0.5,
+    bluffFactor: 0.4,
+    discipline: 0.5,
+    stackAwareness: 0.5,
+  },
+  hard: {
+    smartness: 0.78,
+    braveness: 0.7,
+    bluffFactor: 0.55,
+    discipline: 0.7,
+    stackAwareness: 0.7,
+  },
+};
+
 export function createNpcProfile(difficulty) {
-  let baseSmart;
-  let baseBrave;
-  let baseBluff;
-  let baseDiscipline;
-  let baseStack;
-
-  switch (difficulty) {
-    case "easy":
-      baseSmart = 0.35;
-      baseBrave = 0.35;
-      baseBluff = 0.25;
-      baseDiscipline = 0.35;
-      baseStack = 0.35;
-      break;
-    case "hard":
-      baseSmart = 0.78;
-      baseBrave = 0.7;
-      baseBluff = 0.55;
-      baseDiscipline = 0.7;
-      baseStack = 0.7;
-      break;
-    case "normal":
-    default:
-      baseSmart = 0.55;
-      baseBrave = 0.5;
-      baseBluff = 0.4;
-      baseDiscipline = 0.5;
-      baseStack = 0.5;
-      break;
-  }
-
+  const base = DIFFICULTY_PROFILES[difficulty] || DIFFICULTY_PROFILES.normal;
   const npcClass = NPC_CLASSES[Math.floor(Math.random() * NPC_CLASSES.length)];
-  let profile = {
+  const profile = {
     npcClass,
-    smartness: jitter(baseSmart, 0.18),
-    braveness: jitter(baseBrave, 0.2),
-    bluffFactor: jitter(baseBluff, 0.25),
-    discipline: jitter(baseDiscipline, 0.2),
-    stackAwareness: jitter(baseStack, 0.2),
+    smartness: jitter(base.smartness, 0.18),
+    braveness: jitter(base.braveness, 0.2),
+    bluffFactor: jitter(base.bluffFactor, 0.25),
+    discipline: jitter(base.discipline, 0.2),
+    stackAwareness: jitter(base.stackAwareness, 0.2),
   };
+  applyClassTuning(profile);
+  return profile;
+}
 
-  switch (npcClass) {
+function applyClassTuning(profile) {
+  switch (profile.npcClass) {
     case "ODDS_DRIVEN":
-      profile.smartness = clamp(profile.smartness + 0.15, 0.05, 0.98);
-      profile.discipline = clamp(profile.discipline + 0.1, 0.05, 0.98);
-      profile.bluffFactor = clamp(profile.bluffFactor - 0.05, 0.05, 0.98);
+      profile.smartness = clampProfile(profile.smartness + 0.15);
+      profile.discipline = clampProfile(profile.discipline + 0.1);
+      profile.bluffFactor = clampProfile(profile.bluffFactor - 0.05);
       break;
     case "BLUFFER":
-      profile.bluffFactor = clamp(profile.bluffFactor + 0.2, 0.05, 0.98);
-      profile.braveness = clamp(profile.braveness + 0.15, 0.05, 0.98);
-      profile.discipline = clamp(profile.discipline - 0.1, 0.05, 0.98);
+      profile.bluffFactor = clampProfile(profile.bluffFactor + 0.2);
+      profile.braveness = clampProfile(profile.braveness + 0.15);
+      profile.discipline = clampProfile(profile.discipline - 0.1);
       break;
     case "TIGHT_AGGRESSIVE":
-      profile.discipline = clamp(profile.discipline + 0.2, 0.05, 0.98);
-      profile.braveness = clamp(profile.braveness + 0.1, 0.05, 0.98);
+      profile.discipline = clampProfile(profile.discipline + 0.2);
+      profile.braveness = clampProfile(profile.braveness + 0.1);
       break;
     case "LOOSE_AGGRESSIVE":
-      profile.braveness = clamp(profile.braveness + 0.2, 0.05, 0.98);
-      profile.bluffFactor = clamp(profile.bluffFactor + 0.1, 0.05, 0.98);
-      profile.discipline = clamp(profile.discipline - 0.1, 0.05, 0.98);
+      profile.braveness = clampProfile(profile.braveness + 0.2);
+      profile.bluffFactor = clampProfile(profile.bluffFactor + 0.1);
+      profile.discipline = clampProfile(profile.discipline - 0.1);
       break;
     case "WELL_ROUNDED":
-      profile = {
-        ...profile,
-        smartness: clamp(profile.smartness + 0.12, 0.05, 0.98),
-        braveness: clamp(profile.braveness + 0.12, 0.05, 0.98),
-        bluffFactor: clamp(profile.bluffFactor + 0.1, 0.05, 0.98),
-        discipline: clamp(profile.discipline + 0.12, 0.05, 0.98),
-        stackAwareness: clamp(profile.stackAwareness + 0.12, 0.05, 0.98),
-      };
+      profile.smartness = clampProfile(profile.smartness + 0.12);
+      profile.braveness = clampProfile(profile.braveness + 0.12);
+      profile.bluffFactor = clampProfile(profile.bluffFactor + 0.1);
+      profile.discipline = clampProfile(profile.discipline + 0.12);
+      profile.stackAwareness = clampProfile(profile.stackAwareness + 0.12);
       break;
     default:
       break;
   }
-
-  return profile;
 }
 
 export class NpcBrain {
   decide(npc, state, context) {
     const profile = npc.profile;
     if (!profile) {
-      return { action: "call", raiseBy: 0, reason: "default" };
+      return { action: "call", raiseBy: 0 };
     }
 
     const equity = estimateEquity(npc, state, profile);
@@ -130,16 +126,16 @@ export class NpcBrain {
 
     if (callAmount > 0 && adjustedEquity + 0.1 * aggression < potOdds) {
       if (Math.random() < profile.discipline + 0.2) {
-        return { action: "fold", raiseBy: 0, reason: "low equity" };
+        return { action: "fold", raiseBy: 0 };
       }
     }
 
     if (wantsRaise && canRaise) {
       const raiseBy = chooseRaiseSize(npc, state, profile, context);
-      return { action: "raise", raiseBy, reason: "raise" };
+      return { action: "raise", raiseBy };
     }
 
-    return { action: "call", raiseBy: 0, reason: callAmount > 0 ? "call" : "check" };
+    return { action: "call", raiseBy: 0 };
   }
 }
 
@@ -156,59 +152,26 @@ function chooseRaiseSize(npc, state, profile, context) {
 
 function estimateEquity(npc, state, profile) {
   const simulations = Math.floor(400 + profile.smartness * 500);
-  const known = [];
-  for (const card of state.communityCards) {
-    if (card) known.push(card);
-  }
-  for (const card of npc.holeCards) {
-    if (card) known.push(card);
-  }
+  const known = getKnownCards(state.communityCards, npc.holeCards);
   if (npc.holeCards.some((card) => !card)) {
     return 0.4;
   }
 
+  const baseDeck = createDeckExcluding(known);
+  const opponents = state.players.filter((player) => player !== npc && !player.folded);
   let wins = 0;
   let ties = 0;
 
   for (let t = 0; t < simulations; t += 1) {
-    const deck = buildDeckExcluding(known);
-    shuffleInPlace(deck);
+    const deck = shuffle([...baseDeck]);
+    const community = completeCommunity(state.communityCards, deck);
+    const npcScore = bestScore([...npc.holeCards, ...community]);
+    const result = compareAgainstOpponents(opponents, community, deck, npcScore);
 
-    const community = [...state.communityCards.filter(Boolean)];
-    while (community.length < 5) {
-      community.push(deck.pop());
-    }
-
-    const opponents = state.players.filter((p) => p !== npc && !p.folded);
-    const opponentScores = [];
-    for (const opponent of opponents) {
-      const oppCards = [deck.pop(), deck.pop()];
-      const full = [...oppCards, ...community];
-      opponentScores.push(bestScore(full));
-    }
-
-    const npcFull = [...npc.holeCards, ...community];
-    const npcScore = bestScore(npcFull);
-
-    let npcBest = true;
-    let npcTie = false;
-    for (const score of opponentScores) {
-      if (score > npcScore) {
-        npcBest = false;
-        npcTie = false;
-        break;
-      }
-      if (score === npcScore) {
-        npcTie = true;
-      }
-    }
-
-    if (npcBest) {
-      if (npcTie) {
-        ties += 1;
-      } else {
-        wins += 1;
-      }
+    if (result === "win") {
+      wins += 1;
+    } else if (result === "tie") {
+      ties += 1;
     }
   }
 
@@ -237,20 +200,47 @@ function evaluateStackPressure(npc, state) {
   return npc.chips / average;
 }
 
-function buildDeckExcluding(knownCards) {
-  const deck = createDeck();
-  if (!knownCards.length) return deck;
-  const known = new Set(knownCards.map((card) => cardKey(card)));
-  return deck.filter((card) => !known.has(cardKey(card)));
+function compareAgainstOpponents(opponents, community, deck, npcScore) {
+  let tie = false;
+  for (const _opponent of opponents) {
+    const opponentScore = bestScore([deck.pop(), deck.pop(), ...community]);
+    if (opponentScore > npcScore) {
+      return "loss";
+    }
+    if (opponentScore === npcScore) {
+      tie = true;
+    }
+  }
+  return tie ? "tie" : "win";
 }
 
-function shuffleInPlace(deck) {
-  for (let i = deck.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [deck[i], deck[j]] = [deck[j], deck[i]];
+function completeCommunity(communityCards, deck) {
+  const community = [...communityCards.filter(Boolean)];
+  while (community.length < 5) {
+    community.push(deck.pop());
   }
+  return community;
+}
+
+function getKnownCards(communityCards, holeCards) {
+  const known = [];
+  for (const card of communityCards) {
+    if (card) {
+      known.push(card);
+    }
+  }
+  for (const card of holeCards) {
+    if (card) {
+      known.push(card);
+    }
+  }
+  return known;
 }
 
 function jitter(base, range) {
-  return clamp(base + (Math.random() * 2 - 1) * range, 0.05, 0.98);
+  return clampProfile(base + (Math.random() * 2 - 1) * range);
+}
+
+function clampProfile(value) {
+  return clamp(value, PROFILE_MIN, PROFILE_MAX);
 }

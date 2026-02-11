@@ -38,6 +38,14 @@ export function createDeck() {
   return deck;
 }
 
+export function createDeckExcluding(excludedCards = []) {
+  if (!excludedCards.length) {
+    return createDeck();
+  }
+  const excluded = new Set(excludedCards.filter(Boolean).map(cardKey));
+  return createDeck().filter((card) => !excluded.has(cardKey(card)));
+}
+
 export function shuffle(deck) {
   for (let i = deck.length - 1; i > 0; i -= 1) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -47,6 +55,9 @@ export function shuffle(deck) {
 }
 
 export function cardToAsset(card) {
+  if (!card) {
+    return "";
+  }
   return `assets/standard_cards/${card.value}_of_${card.suitName}.svg`;
 }
 

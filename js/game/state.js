@@ -1,11 +1,15 @@
 import { createDeck, shuffle } from "../core/cards.js";
 
+function emptyCommunityCards() {
+  return Array(5).fill(null);
+}
+
 export class GameState {
   constructor(config, npcProfileFactory) {
     this.config = config;
     this.npcProfileFactory = npcProfileFactory;
     this.players = [];
-    this.communityCards = Array(5).fill(null);
+    this.communityCards = emptyCommunityCards();
     this.burnPile = [];
     this.deck = [];
     this.dealerIndex = 0;
@@ -16,13 +20,13 @@ export class GameState {
   }
 
   setupPlayers() {
-    this.players = [];
-    this.players.push(buildPlayer("You", this.config.startingChips, true));
+    const players = [buildPlayer("You", this.config.startingChips, true)];
     for (let i = 0; i < this.config.npcCount; i += 1) {
       const npc = buildPlayer(`NPC ${i + 1}`, this.config.startingChips, false);
       npc.profile = this.npcProfileFactory();
-      this.players.push(npc);
+      players.push(npc);
     }
+    this.players = players;
     this.dealerIndex = 0;
     this.handCount = 0;
   }
@@ -36,7 +40,7 @@ export class GameState {
     for (const player of this.players) {
       resetPlayerForHand(player);
     }
-    this.communityCards = Array(5).fill(null);
+    this.communityCards = emptyCommunityCards();
     this.burnPile = [];
     this.pot = 0;
     this.currentBet = 0;

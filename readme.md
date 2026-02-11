@@ -1,22 +1,31 @@
-# Poker Hand Calculator (JavaScript Canvas)
+# Texas Hold'em (Vanilla JS)
 
-A poker game built using **JavaScript** and the **HTML5 Canvas API**, featuring real-time poker hand calculation and evaluation logic.
+Browser-based Texas Hold'em with NPC opponents, configurable blinds, betting rounds, showdown evaluation, and all-in odds previews.
 
 ![Demo](assets/images/demo.png)
 
-## Features
-- Poker hand calculation and ranking
-- Canvas-based rendering (no external game engine)
-- Simple, lightweight implementation
-- Written in vanilla JavaScript
+## Stack
+- JavaScript (ES modules)
+- HTML + Tailwind CDN classes
+- Vanilla CSS
 
-## Tech Stack
-- JavaScript (ES6+)
-- HTML5 Canvas
-- HTML / CSS
-
-## Getting Started
-
-1. Clone the repository:
+## Run Locally
+1. Clone the repo.
+2. Start a local web server from the project root (ES modules require HTTP, not `file://`):
    ```bash
-   git clone https://github.com/your-username/your-repo-name.git
+   npx serve .
+   ```
+3. Open the printed localhost URL in your browser.
+
+## Project Structure
+- `index.html`: Table layout and controls.
+- `js/main.js`: App entry point and event wiring.
+- `js/game/`: Game flow, state, NPC AI, odds simulation.
+- `js/core/`: Card/deck utilities and hand evaluator.
+- `js/ui/table.js`: DOM updates and card dealing animations.
+- `assets/`: Cards, logo, background, audio.
+
+## Gameplay Notes
+- Small and big blinds increase every `blindIncreaseHands` hands.
+- NPC behavior depends on `difficulty` in `js/game/config.js`.
+- All-in odds are Monte Carlo estimates and are recalculated as community cards appear.

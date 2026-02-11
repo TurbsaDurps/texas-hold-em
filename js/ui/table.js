@@ -17,10 +17,10 @@ export class TableUI {
       };
     });
     this.npcCards = this.buildNpcMap();
-    this.npcLabels = this.buildNpcLabelMap();
-    this.oddsLabels = this.buildOddsLabelMap();
-    this.betLabels = this.buildBetLabelMap();
-    this.dealerLabels = this.buildDealerLabelMap();
+    this.npcLabels = this.buildSeatMap("[data-seat-label]", "seatLabel");
+    this.oddsLabels = this.buildSeatMap("[data-seat-odds]", "seatOdds");
+    this.betLabels = this.buildSeatMap("[data-seat-bet]", "seatBet");
+    this.dealerLabels = this.buildSeatMap("[data-seat-dealer]", "seatDealer");
 
     this.potTotal = document.getElementById("pot-total");
     this.potChange = document.getElementById("pot-change");
@@ -36,6 +36,10 @@ export class TableUI {
     this.callButton = document.getElementById("btn-call");
     this.raiseButton = document.getElementById("btn-raise");
     this.allInButton = document.getElementById("btn-allin");
+    this.reducedMotionQuery =
+      typeof window !== "undefined" && typeof window.matchMedia === "function"
+        ? window.matchMedia("(prefers-reduced-motion: reduce)")
+        : null;
 
     this.raiseValue = 0;
     this.raisePanelOpen = false;
@@ -59,41 +63,11 @@ export class TableUI {
     return map;
   }
 
-  buildNpcLabelMap() {
+  buildSeatMap(selector, datasetKey) {
     const map = new Map();
-    const labels = Array.from(document.querySelectorAll("[data-seat-label]"));
+    const labels = Array.from(document.querySelectorAll(selector));
     for (const label of labels) {
-      const seat = Number(label.dataset.seatLabel);
-      map.set(seat, label);
-    }
-    return map;
-  }
-
-  buildOddsLabelMap() {
-    const map = new Map();
-    const labels = Array.from(document.querySelectorAll("[data-seat-odds]"));
-    for (const label of labels) {
-      const seat = Number(label.dataset.seatOdds);
-      map.set(seat, label);
-    }
-    return map;
-  }
-
-  buildBetLabelMap() {
-    const map = new Map();
-    const labels = Array.from(document.querySelectorAll("[data-seat-bet]"));
-    for (const label of labels) {
-      const seat = Number(label.dataset.seatBet);
-      map.set(seat, label);
-    }
-    return map;
-  }
-
-  buildDealerLabelMap() {
-    const map = new Map();
-    const labels = Array.from(document.querySelectorAll("[data-seat-dealer]"));
-    for (const label of labels) {
-      const seat = Number(label.dataset.seatDealer);
+      const seat = Number(label.dataset[datasetKey]);
       map.set(seat, label);
     }
     return map;
@@ -123,14 +97,6 @@ export class TableUI {
     if (!this.raisePanel) return;
     this.raisePanelOpen = false;
     this.raisePanel.classList.add("hidden");
-  }
-
-  toggleRaisePanel() {
-    if (this.raisePanelOpen) {
-      this.hideRaisePanel();
-    } else {
-      this.showRaisePanel();
-    }
   }
 
   setRaiseRange(min, max, value, step = 1) {
@@ -228,14 +194,14 @@ export class TableUI {
       const odds = oddsBySeat ? oddsBySeat[seat] : null;
       if (odds == null) {
         label.textContent = "";
-        label.classList.add("hidden");
+        this.setHidden(label, true);
         label.style.backgroundColor = "";
         label.style.color = "";
         continue;
       }
       const percent = Math.round(odds * 100);
       label.textContent = `ODDS ${percent}%`;
-      label.classList.remove("hidden");
+      this.setHidden(label, false);
       if (percent > 75) {
         label.style.backgroundColor = "#16a34a";
         label.style.color = "#ffffff";
@@ -258,28 +224,24 @@ export class TableUI {
     if (!label) return;
     if (!amount || amount <= 0) {
       label.textContent = "";
-      label.classList.add("hidden");
+      this.setHidden(label, true);
       return;
     }
     label.textContent = formatChips(amount);
-    label.classList.remove("hidden");
+    this.setHidden(label, false);
   }
 
   clearBetIndicators() {
     for (const label of this.betLabels.values()) {
       label.textContent = "";
-      label.classList.add("hidden");
+      this.setHidden(label, true);
     }
   }
 
   setDealerSeat(seat) {
     for (const [key, label] of this.dealerLabels.entries()) {
       if (!label) continue;
-      if (key === seat) {
-        label.classList.remove("hidden");
-      } else {
-        label.classList.add("hidden");
-      }
+      this.setHidden(label, key !== seat);
     }
   }
 
@@ -299,24 +261,11 @@ export class TableUI {
   }
 
   setFoldedSeat(seat, folded) {
-    const filterValue = folded ? "grayscale(100%)" : "none";
     if (seat === 0) {
-      for (const card of this.playerCards) {
-        if (!card) continue;
-        card.style.filter = filterValue;
-        card.style.opacity = "50%"
-
-      }
+      this.applyFoldState(this.playerCards, folded);
       return;
     }
-    const cards = this.npcCards.get(seat);
-    if (!cards) return;
-    for (const card of cards) {
-      if (!card) continue;
-      card.style.filter = filterValue;
-      card.style.opacity = "50%"
-
-    }
+    this.applyFoldState(this.npcCards.get(seat), folded);
   }
 
   clearFoldStates() {
@@ -326,35 +275,27 @@ export class TableUI {
     }
   }
 
+  applyFoldState(cards, folded) {
+    if (!cards) return;
+    const filterValue = folded ? "grayscale(100%)" : "none";
+    const opacityValue = folded ? "0.5" : "1";
+    for (const card of cards) {
+      if (!card) continue;
+      card.style.filter = filterValue;
+      card.style.opacity = opacityValue;
+    }
+  }
+
   resetTable() {
     this.clearOdds();
     this.clearShowdownHighlights();
     this.clearBetIndicators();
     this.clearFoldStates();
     this.hideRaisePanel();
-    for (const card of this.playerCards) {
-      if (!card) continue;
-      this.clearCard(card);
-    }
-    for (const card of this.communityCards) {
-      if (!card.back || !card.front || !card.container) continue;
-      card.back.style.backgroundImage = "none";
-      card.front.style.backgroundImage = "none";
-      card.back.style.backgroundRepeat = "no-repeat";
-      card.back.style.backgroundPosition = "center";
-      card.back.style.backgroundSize = "contain";
-      card.front.style.backgroundRepeat = "no-repeat";
-      card.front.style.backgroundPosition = "center";
-      card.front.style.backgroundSize = "contain";
-      card.container.classList.remove("flipped");
-      card.container.style.opacity = "0";
-    }
-    for (const [seat, cards] of this.npcCards.entries()) {
-      if (!cards) continue;
-      for (const card of cards) {
-        if (!card) continue;
-        this.clearCard(card);
-      }
+    this.clearCardList(this.playerCards);
+    this.resetCommunityCards();
+    for (const cards of this.npcCards.values()) {
+      this.clearCardList(cards);
     }
     this.setDeckVisible(true);
     this.updateBurnPile(0);
@@ -366,14 +307,47 @@ export class TableUI {
     return cards[index];
   }
 
+  setCardVisual(element, assetPath, opacity = "1") {
+    if (!element) return;
+    element.style.backgroundImage = assetPath ? `url("${assetPath}")` : "none";
+    element.style.backgroundRepeat = "no-repeat";
+    element.style.backgroundPosition = "center";
+    element.style.backgroundSize = "contain";
+    element.style.opacity = opacity;
+  }
+
+  setHidden(element, hidden) {
+    if (!element) return;
+    if (hidden) {
+      element.classList.add("hidden");
+      return;
+    }
+    element.classList.remove("hidden");
+  }
+
+  clearCardList(cards) {
+    if (!cards) return;
+    for (const card of cards) {
+      if (!card) continue;
+      this.clearCard(card);
+    }
+  }
+
+  resetCommunityCards() {
+    for (const slot of this.communityCards) {
+      if (!slot?.back || !slot?.front || !slot?.container) continue;
+      this.clearCard(slot.back);
+      this.clearCard(slot.front);
+      slot.container.classList.remove("flipped");
+      slot.container.style.transform = "";
+      slot.container.style.opacity = "0";
+    }
+  }
+
   setPlayerCard(index, card) {
     const target = this.playerCards[index];
     if (!target) return;
-    target.style.backgroundImage = `url("${cardToAsset(card)}")`;
-    target.style.backgroundRepeat = "no-repeat";
-    target.style.backgroundPosition = "center";
-    target.style.backgroundSize = "contain";
-    target.style.opacity = "1";
+    this.setCardVisual(target, cardToAsset(card));
     this.flashCard(target);
   }
 
@@ -381,33 +355,47 @@ export class TableUI {
     const cards = this.npcCards.get(seat);
     if (!cards || !cards[index]) return;
     const element = cards[index];
-    element.style.backgroundImage = reveal
-      ? `url("${cardToAsset(card)}")`
-      : `url("${CARD_BACK_ASSET}")`;
-    element.style.backgroundRepeat = "no-repeat";
-    element.style.backgroundPosition = "center";
-    element.style.backgroundSize = "contain";
-    element.style.opacity = "1";
+    this.setCardVisual(element, reveal ? cardToAsset(card) : CARD_BACK_ASSET);
     this.flashCard(element);
   }
 
   setCommunityCard(index, card) {
     const slot = this.communityCards[index];
-    if (!slot || !slot.front || !slot.container) return;
-    slot.front.style.backgroundImage = `url("${cardToAsset(card)}")`;
-    slot.front.style.backgroundRepeat = "no-repeat";
-    slot.front.style.backgroundPosition = "center";
-    slot.front.style.backgroundSize = "contain";
-    slot.container.classList.add("flipped");
+    if (!slot || !slot.back || !slot.front || !slot.container || !card) return;
+    const cardAsset = cardToAsset(card);
+    this.setCardVisual(slot.back, cardAsset);
+    this.setCardVisual(slot.front, cardAsset);
+    slot.container.classList.remove("flipped");
+    slot.container.style.transform = "";
     slot.container.style.opacity = "1";
     this.flashCard(slot.container);
   }
 
+  async waitForRect(element, maxFrames = 8) {
+    if (!element) return null;
+    let rect = element.getBoundingClientRect();
+    let frame = 0;
+    while ((!rect.width || !rect.height) && frame < maxFrames) {
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      rect = element.getBoundingClientRect();
+      frame += 1;
+    }
+    return rect;
+  }
+
   async animateDealTo(target) {
     if (!this.deckPile || !target) return;
-    const deckRect = this.deckPile.getBoundingClientRect();
-    const targetRect = target.getBoundingClientRect();
+    const duration = this.config.dealAnimationMs || 250;
+    if (this.reducedMotionQuery?.matches) {
+      await sleep(Math.max(40, Math.floor(duration * 0.35)));
+      return;
+    }
+    const [deckRect, targetRect] = await Promise.all([
+      this.waitForRect(this.deckPile),
+      this.waitForRect(target),
+    ]);
     if (!deckRect.width || !deckRect.height || !targetRect.width || !targetRect.height) {
+      await sleep(Math.max(60, Math.floor(duration * 0.5)));
       return;
     }
 
@@ -418,9 +406,10 @@ export class TableUI {
     fly.style.left = `${deckRect.left}px`;
     fly.style.top = `${deckRect.top}px`;
     fly.style.backgroundImage = `url("${CARD_BACK_ASSET}")`;
-    const duration = this.config.dealAnimationMs || 250;
     fly.style.transition = `transform ${duration}ms cubic-bezier(0.22, 0.61, 0.36, 1)`;
     fly.style.transformOrigin = "top left";
+    fly.style.transform = "translate3d(0, 0, 0) scale(1, 1)";
+    fly.style.opacity = "0.96";
 
     document.body.appendChild(fly);
 
@@ -428,11 +417,30 @@ export class TableUI {
     const scaleY = targetRect.height / deckRect.height;
     const translateX = targetRect.left - deckRect.left;
     const translateY = targetRect.top - deckRect.top;
+    const maxTilt = this.config.dealTiltMaxDeg ?? 7;
+    const tilt = Math.max(-maxTilt, Math.min(maxTilt, translateX / 85));
+    const settleMs = this.config.dealSettleBufferMs ?? 90;
 
     await new Promise((resolve) => {
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        fly.removeEventListener("transitionend", onTransitionEnd);
+        resolve();
+      };
+      const onTransitionEnd = (event) => {
+        if (event.target !== fly || event.propertyName !== "transform") return;
+        clearTimeout(timer);
+        finish();
+      };
+      const timer = setTimeout(finish, duration + settleMs);
+      fly.addEventListener("transitionend", onTransitionEnd);
       requestAnimationFrame(() => {
-        fly.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
-        setTimeout(resolve, duration + 30);
+        requestAnimationFrame(() => {
+          fly.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${scaleX}, ${scaleY}) rotate(${tilt}deg)`;
+          fly.style.opacity = "1";
+        });
       });
     });
 
@@ -494,11 +502,7 @@ export class TableUI {
       this.clearCard(this.deckPile);
       return;
     }
-    this.deckPile.style.backgroundImage = `url("${CARD_BACK_ASSET}")`;
-    this.deckPile.style.backgroundRepeat = "no-repeat";
-    this.deckPile.style.backgroundPosition = "center";
-    this.deckPile.style.backgroundSize = "contain";
-    this.deckPile.style.opacity = "1";
+    this.setCardVisual(this.deckPile, CARD_BACK_ASSET);
   }
 
   updateBurnPile(count) {
@@ -507,11 +511,7 @@ export class TableUI {
       this.clearCard(this.burnPile);
       return;
     }
-    this.burnPile.style.backgroundImage = `url("${CARD_BACK_ASSET}")`;
-    this.burnPile.style.backgroundRepeat = "no-repeat";
-    this.burnPile.style.backgroundPosition = "center";
-    this.burnPile.style.backgroundSize = "contain";
-    this.burnPile.style.opacity = "1";
+    this.setCardVisual(this.burnPile, CARD_BACK_ASSET);
   }
 
   flashCard(element) {
@@ -521,11 +521,6 @@ export class TableUI {
   }
 
   clearCard(element) {
-    if (!element) return;
-    element.style.backgroundImage = "none";
-    element.style.backgroundRepeat = "no-repeat";
-    element.style.backgroundPosition = "center";
-    element.style.backgroundSize = "contain";
-    element.style.opacity = "0";
+    this.setCardVisual(element, null, "0");
   }
 }
