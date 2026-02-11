@@ -262,10 +262,10 @@ export class TableUI {
 
   setFoldedSeat(seat, folded) {
     if (seat === 0) {
-      this.applyFoldState(this.playerCards, folded);
+      this.applyFoldState(this.playerCards, folded,seat);
       return;
     }
-    this.applyFoldState(this.npcCards.get(seat), folded);
+    this.applyFoldState(this.npcCards.get(seat), folded,seat);
   }
 
   clearFoldStates() {
@@ -275,12 +275,20 @@ export class TableUI {
     }
   }
 
-  applyFoldState(cards, folded) {
+  applyFoldState(cards, folded,seat) {
     if (!cards) return;
     const filterValue = folded ? "grayscale(100%)" : "none";
     const opacityValue = folded ? "0.5" : "1";
     for (const card of cards) {
       if (!card) continue;
+
+      if(seat == 0 && folded){
+        console.log("helo")
+        card.classList.add("translate-y-20")
+      } else {
+        card.classList.remove("translate-y-20")
+      }
+
       card.style.filter = filterValue;
       card.style.opacity = opacityValue;
     }
