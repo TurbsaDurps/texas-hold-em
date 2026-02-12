@@ -7,7 +7,7 @@ import { TableUI } from "./ui/table.js";
 const config = { ...GAME_CONFIG };
 
 const ui = new TableUI(config);
-const state = new GameState(config, () => createNpcProfile(config.difficulty));
+const state = new GameState(config, () => createNpcProfile());
 state.setupPlayers();
 ui.updateNpcLabels(state.players);
 ui.updatePot(0, "");

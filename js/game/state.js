@@ -57,6 +57,7 @@ export class GameState {
     const player = this.players[playerIndex];
     const posted = takeChips(player, amount);
     player.currentBet += posted;
+    player.totalContribution += posted;
     this.pot += posted;
     this.currentBet = Math.max(this.currentBet, player.currentBet);
   }
@@ -115,6 +116,7 @@ export function buildPlayer(name, chips, isHuman) {
     isHuman,
     holeCards: [null, null],
     currentBet: 0,
+    totalContribution: 0,
     folded: false,
     allIn: false,
     actedThisRound: false,
@@ -127,6 +129,7 @@ export function buildPlayer(name, chips, isHuman) {
 export function resetPlayerForHand(player) {
   player.holeCards = [null, null];
   player.currentBet = 0;
+  player.totalContribution = 0;
   player.folded = false;
   player.allIn = false;
   player.actedThisRound = false;

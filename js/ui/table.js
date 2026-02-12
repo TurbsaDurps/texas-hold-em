@@ -347,8 +347,10 @@ export class TableUI {
       this.clearCard(slot.back);
       this.clearCard(slot.front);
       slot.container.classList.remove("flipped");
+      slot.container.classList.remove("deal-fade");
       slot.container.style.transform = "";
       slot.container.style.opacity = "0";
+      slot.container.style.visibility = "hidden";
     }
   }
 
@@ -371,6 +373,7 @@ export class TableUI {
     const slot = this.communityCards[index];
     if (!slot || !slot.back || !slot.front || !slot.container || !card) return;
     const cardAsset = cardToAsset(card);
+    slot.container.style.visibility = "visible";
     this.setCardVisual(slot.back, cardAsset);
     this.setCardVisual(slot.front, cardAsset);
     slot.container.classList.remove("flipped");

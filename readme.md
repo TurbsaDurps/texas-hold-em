@@ -27,5 +27,5 @@ Browser-based Texas Hold'em with NPC opponents, configurable blinds, betting rou
 
 ## Gameplay Notes
 - Small and big blinds increase every `blindIncreaseHands` hands.
-- NPC behavior depends on `difficulty` in `js/game/config.js`.
+- NPC behavior is driven by expert-only AI logic in `js/game/ai.js`.
 - All-in odds are Monte Carlo estimates and are recalculated as community cards appear.
