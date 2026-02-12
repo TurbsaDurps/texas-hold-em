@@ -12,6 +12,7 @@ export const GAME_CONFIG = {
   handTransitionDelayMs: 2000,
   dealDelayMs: 340,
   // dealAnimationMs: 260,
+  winAnimationMs: 1200,
   dealAnimationMs: 150,
   dealTiltMaxDeg: 7,
   dealSettleBufferMs: 90,

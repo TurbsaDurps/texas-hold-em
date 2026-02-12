@@ -48,6 +48,12 @@ export class GameController {
       await sleep(this.config.preDealDelayMs);
       await this.dealHoleCards();
       await this.runBettingRound(this.getPreFlopStart());
+
+      // Check if human player is out of chips
+      if (this.isPlayerOutOfChips()) {
+        this.ui.showGameOver();
+        return;
+      }
     } finally {
       this.pendingActionResolver = null;
       this.updateButtonState();
@@ -566,6 +572,12 @@ export class GameController {
       activePlayers,
     }));
     this.ui.clearBetIndicators();
+
+    // Show winning NPC cards animation if winner is not the player
+    const npcWinners = payoutWinners.filter((seat) => seat !== 0);
+    if (npcWinners.length > 0) {
+      await this.ui.highlightWinningNpcCards(npcWinners);
+    }
   }
 
   refundUncalledAllInExcess() {
@@ -765,5 +777,10 @@ export class GameController {
       return [1, 2, 0, 3];
     }
     return Array.from({ length: count }, (_, index) => index);
+  }
+
+  isPlayerOutOfChips() {
+    const humanPlayer = this.state.players[0];
+    return humanPlayer && humanPlayer.chips <= 0;
   }
 }

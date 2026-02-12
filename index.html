@@ -141,6 +141,29 @@
         opacity: 1;
       }
     }
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+    @keyframes cardExpand {
+      from {
+        transform: scale(1);
+      }
+      to {
+        transform: scale(1.15);
+      }
+    }
+    #game-over-modal {
+      animation: modalFadeIn 0.5s ease-out;
+    }
+    .winning-npc-card {
+      animation: cardExpand 0.4s ease-out forwards;
+      filter: drop-shadow(0 0 20px rgba(34, 197, 94, 0.8));
+    }
     @media (prefers-reduced-motion: reduce) {
       .bg-pan {
         animation: none;
@@ -203,6 +226,22 @@
         </div>
       </div>
     </div>
+
+    <!-- Game Over Modal -->
+    <div id="game-over-modal" class="hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center">
+      <div class="bg-zinc-800 border-4 border-white/30 rounded-2xl p-12 text-center max-w-md mx-4 shadow-2xl">
+        <h1 class="text-6xl font-black text-red-500 mb-4 drop-shadow-[0_2px_2px_rgba(66,135,245,0.8)]">GAME OVER</h1>
+        <p class="text-2xl text-white mb-8 font-bold">You've run out of chips!</p>
+        <p class="text-lg text-gray-300 mb-12">Better luck next time. Want to try again?</p>
+        <button
+          id="btn-play-again"
+          class="w-full py-4 ring-2 ring-black border-b-8 border border-emerald-300 bg-emerald-100 text-2xl font-bold text-emerald-600 transition-all duration-500 hover:-translate-y-2 px-8 border rounded-xl cursor-pointer"
+        >
+          PLAY AGAIN
+        </button>
+      </div>
+    </div>
+
     <!-- game -->
     <div
       class="w-full h-screen bg-zinc-900 relative flex flex-col items-center justify-between overflow-hidden select-none"

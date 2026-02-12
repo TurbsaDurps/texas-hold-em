@@ -534,4 +534,47 @@ export class TableUI {
   clearCard(element) {
     this.setCardVisual(element, null, "0");
   }
+
+  showGameOver() {
+    const modal = document.getElementById("game-over-modal");
+    if (modal) {
+      modal.classList.remove("hidden");
+    }
+  }
+
+  hideGameOver() {
+    const modal = document.getElementById("game-over-modal");
+    if (modal) {
+      modal.classList.add("hidden");
+    }
+  }
+
+  async highlightWinningNpcCards(winnerSeats) {
+    // Add animation to winning NPC cards
+    for (const seat of winnerSeats) {
+      const cardSlots = this.npcCards.get(seat);
+      if (cardSlots) {
+        for (const card of cardSlots) {
+          if (card) {
+            card.classList.add("winning-npc-card");
+          }
+        }
+      }
+    }
+
+    // Wait 3 seconds
+    await new Promise((resolve) => setTimeout(resolve, this.config.winAnimationMs || 3000));
+
+    // Remove animation
+    for (const seat of winnerSeats) {
+      const cardSlots = this.npcCards.get(seat);
+      if (cardSlots) {
+        for (const card of cardSlots) {
+          if (card) {
+            card.classList.remove("winning-npc-card");
+          }
+        }
+      }
+    }
+  }
 }
