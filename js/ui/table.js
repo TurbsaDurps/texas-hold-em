@@ -542,6 +542,19 @@ export class TableUI {
     }
   }
 
+  showOtherPlayBtn() {
+    const playBtn = document.getElementById("play-btn-2");
+    if (playBtn) {
+      playBtn.classList.remove("hidden");
+    }
+  }
+  hideOtherPlayBtn() {
+    const playBtn = document.getElementById("play-btn-2");
+    if (playBtn) {
+      playBtn.classList.add("hidden");
+    }
+  }
+
   hideGameOver() {
     const modal = document.getElementById("game-over-modal");
     if (modal) {

@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -12,196 +12,199 @@
 
     <script type="module" src="js/main.js" defer></script>
     <title>Poker</title>
-  <style>
-    @import url("https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap");
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@100..900&display=swap");
 
-    * {
-      font-family: "Roboto Slab", serif;
-      overscroll-behavior: none;
-    }
-
-    body,
-    html {
-      margin: 0;
-      padding: 0;
-      overflow: hidden;
-    }
-
-    /* Global disabled button styling */
-    button:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-      pointer-events: none;
-
-      /* flatten depth */
-      transform: none !important;
-      border-bottom-width: 4px !important;
-
-      /* remove glow */
-      filter: grayscale(40%) brightness(0.9);
-
-      /* stop animations */
-      transition: none !important;
-    }
-
-    /* Remove hover effects when disabled */
-    button:disabled:hover {
-      transform: none !important;
-      border-bottom-width: 4px !important;
-    }
-
-    .bg-pan {
-      background-image: url("assets/background.png");
-      background-repeat: repeat-x; /* repeat horizontally */
-      background-size: cover; /* adjust if you want */
-      animation: pan 5s linear infinite;
-    }
-
-    @keyframes pan {
-      0% {
-        background-position: 0 0;
+      * {
+        font-family: "Roboto Slab", serif;
+        overscroll-behavior: none;
       }
-      100% {
-        background-position: -1000px 0; /* change this to match image width / speed */
-      }
-    }
 
-    .perspective {
-      perspective: 1000px;
-      -webkit-perspective: 1000px;
-    }
-    .transform-style-preserve-3d {
-      transform-style: preserve-3d;
-      -webkit-transform-style: preserve-3d;
-    }
-    .backface-hidden {
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-    }
-    .rotate-y-180 {
-      transform: rotateY(180deg);
-      -webkit-transform: rotateY(180deg);
-    }
-    .card.flipped {
-      transform: rotateY(180deg);
-      -webkit-transform: rotateY(180deg);
-    }
-    /* .card {
+      body,
+      html {
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+
+      /* Global disabled button styling */
+      button:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        pointer-events: none;
+
+        /* flatten depth */
+        transform: none !important;
+        border-bottom-width: 4px !important;
+
+        /* remove glow */
+        filter: grayscale(40%) brightness(0.9);
+
+        /* stop animations */
+        transition: none !important;
+      }
+
+      /* Remove hover effects when disabled */
+      button:disabled:hover {
+        transform: none !important;
+        border-bottom-width: 4px !important;
+      }
+
+      .bg-pan {
+        background-image: url("assets/background.png");
+        background-repeat: repeat-x; /* repeat horizontally */
+        background-size: cover; /* adjust if you want */
+        animation: pan 5s linear infinite;
+      }
+
+      @keyframes pan {
+        0% {
+          background-position: 0 0;
+        }
+        100% {
+          background-position: -1000px 0; /* change this to match image width / speed */
+        }
+      }
+
+      .perspective {
+        perspective: 1000px;
+        -webkit-perspective: 1000px;
+      }
+      .transform-style-preserve-3d {
+        transform-style: preserve-3d;
+        -webkit-transform-style: preserve-3d;
+      }
+      .backface-hidden {
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+      }
+      .rotate-y-180 {
+        transform: rotateY(180deg);
+        -webkit-transform: rotateY(180deg);
+      }
+      .card.flipped {
+        transform: rotateY(180deg);
+        -webkit-transform: rotateY(180deg);
+      }
+      /* .card {
       opacity: 0;
       transition: opacity 180ms cubic-bezier(0.22, 0.61, 0.36, 1), filter 180ms ease;
       will-change: transform, opacity;
     } */
-    /* .npc-card {
+      /* .npc-card {
       opacity: 0;
       transition: opacity 220ms cubic-bezier(0.22, 0.61, 0.36, 1), filter 220ms ease;
       will-change: transform, opacity;
     } */
-    .deal-fade {
-      animation: dealFade 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
-    }
-    .deal-fly {
-      position: fixed;
-      z-index: 120;
-      background-repeat: no-repeat;
-      background-position: center;
-      background-size: contain;
-      pointer-events: none;
-      border-radius: 10px;
-      box-shadow: 0 16px 24px rgba(0, 0, 0, 0.35);
-      transform: translate3d(0, 0, 0);
-      backface-visibility: hidden;
-      will-change: transform, opacity;
-      contain: paint;
-    }
-    .dealer-chip {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 28px;
-      height: 28px;
-      border-radius: 999px;
-      background: #f5d365;
-      color: #1f1f1f;
-      font-weight: 800;
-      font-size: 12px;
-      box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
-      border: 2px solid rgba(255, 255, 255, 0.75);
-    }
-    .dealer-chip.hidden {
-      display: none;
-    }
-    @keyframes dealFade {
-      from {
-        opacity: 0.3;
-      }
-      65% {
-        opacity: 0.92;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-    @keyframes modalFadeIn {
-      from {
-        opacity: 0;
-      }
-      to {
-        opacity: 1;
-      }
-    }
-    @keyframes cardExpand {
-      from {
-        transform: scale(1);
-      }
-      to {
-        transform: scale(1.15);
-      }
-    }
-    #game-over-modal {
-      animation: modalFadeIn 0.5s ease-out;
-    }
-    .winning-npc-card {
-      animation: cardExpand 0.4s ease-out forwards;
-      filter: drop-shadow(0 0 20px rgba(34, 197, 94, 0.8));
-    }
-    @media (prefers-reduced-motion: reduce) {
-      .bg-pan {
-        animation: none;
-      }
       .deal-fade {
-        animation: none;
+        animation: dealFade 0.28s cubic-bezier(0.22, 0.61, 0.36, 1);
       }
-      .card,
-      .npc-card {
-        transition-duration: 1ms !important;
+      .deal-fly {
+        position: fixed;
+        z-index: 120;
+        background-repeat: no-repeat;
+        background-position: center;
+        background-size: contain;
+        pointer-events: none;
+        border-radius: 10px;
+        box-shadow: 0 16px 24px rgba(0, 0, 0, 0.35);
+        transform: translate3d(0, 0, 0);
+        backface-visibility: hidden;
+        will-change: transform, opacity;
+        contain: paint;
       }
-    }
-    .raise-input[type="number"] {
-      -webkit-appearance: textfield;
-      -moz-appearance: textfield;
-      appearance: textfield;
-    }
+      .dealer-chip {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 999px;
+        background: #f5d365;
+        color: #1f1f1f;
+        font-weight: 800;
+        font-size: 12px;
+        box-shadow: 0 6px 14px rgba(0, 0, 0, 0.35);
+        border: 2px solid rgba(255, 255, 255, 0.75);
+      }
+      .dealer-chip.hidden {
+        display: none;
+      }
+      @keyframes dealFade {
+        from {
+          opacity: 0.3;
+        }
+        65% {
+          opacity: 0.92;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes modalFadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+      @keyframes cardExpand {
+        from {
+          transform: scale(1);
+        }
+        to {
+          transform: scale(1.15);
+        }
+      }
+      #game-over-modal {
+        animation: modalFadeIn 0.5s ease-out;
+      }
+      .winning-npc-card {
+        animation: cardExpand 0.4s ease-out forwards;
+        filter: drop-shadow(0 0 20px rgba(34, 197, 94, 0.8));
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .bg-pan {
+          animation: none;
+        }
+        .deal-fade {
+          animation: none;
+        }
+        .card,
+        .npc-card {
+          transition-duration: 1ms !important;
+        }
+      }
+      .raise-input[type="number"] {
+        -webkit-appearance: textfield;
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
 
-    .raise-input[type="number"]::-webkit-inner-spin-button,
-    .raise-input[type="number"]::-webkit-outer-spin-button {
-      -webkit-appearance: none;
-    }
-  </style>
+      .raise-input[type="number"]::-webkit-inner-spin-button,
+      .raise-input[type="number"]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+      }
+    </style>
   </head>
 
   <body class="p-0 m-0 overflow-clip">
-    <div id="title-overlay"  class="w-full h-full bg-neutral-900 z-100 duration-500 transition-all">
-      <div id="title-screen" class="w-full h-full flex items-center justify-center relative duration-500 transition-all">
+    <div
+      id="title-overlay"
+      class="w-full absolute h-full bg-neutral-900 z-100 duration-500 transition-all"
+    >
+      <div
+        id="title-screen"
+        class="w-full h-full flex items-center justify-center relative duration-500 transition-all"
+      >
         <div class="absolute inset-0 bg-pan opacity-5"></div>
         <!-- <div class="absolute z-99 top-0 p-4 bg-linear-to-b from-black to-transparent  w-full flex items-center justify-center">
           <input type="range" min="0" max="100" value="50" class="w-1/2 raise-input" />
         </div> -->
         <div class="absolute inset-0 bg-rose-200 opacity-5"></div>
         <div class="flex -gap-10 items-end translate-y-[-50px]">
-          <img
-            src="assets/logo.svg"
-            class="w-[600px] h-[1000px]"
-          />
+          <img src="assets/logo.svg" class="w-[600px] h-[1000px]" />
         </div>
 
         <div
@@ -213,7 +216,7 @@
             POKER
           </h1>
           <button
-          id="play-btn"
+            id="play-btn"
             class="p-4 ring-2 ring-black border-b-8 border border-zinc-300 bg-zinc-100 text-2xl font-bold text-zinc-400 transition-all duration-500 hover:-translate-y-2 px-20 border rounded-xl bg-white cursor-pointer"
           >
             PLAY
@@ -228,11 +231,23 @@
     </div>
 
     <!-- Game Over Modal -->
-    <div id="game-over-modal" class="hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center">
-      <div class="bg-zinc-800 border-4 border-white/30 rounded-2xl p-12 text-center max-w-md mx-4 shadow-2xl">
-        <h1 class="text-6xl font-black text-red-500 mb-4 drop-shadow-[0_2px_2px_rgba(66,135,245,0.8)]">GAME OVER</h1>
-        <p class="text-2xl text-white mb-8 font-bold">You've run out of chips!</p>
-        <p class="text-lg text-gray-300 mb-12">Better luck next time. Want to try again?</p>
+    <div
+      id="game-over-modal"
+      class="hidden fixed inset-0 bg-black/80 z-[200] flex items-center justify-center"
+    >
+      <div
+        class="bg-zinc-800 border-4 relative border-white/5 rounded-2xl p-12 text-center select-none shadow-2xl"
+      >
+        <div
+          id="game-over-close-btn"
+          class="absolute cursor-pointer p-2 rounded-sm hover:bg-white/5 px-4 transition-all duration-500 text-white text-xl font-bold top-2 right-2"
+        >
+          X
+        </div>
+        <h1 class="text-6xl font-black text-red-500 mb-4">※ GAME OVER ※</h1>
+        <p class="text-2xl text-white mb-8 font-bold">
+          You've run out of chips!
+        </p>
         <button
           id="btn-play-again"
           class="w-full py-4 ring-2 ring-black border-b-8 border border-emerald-300 bg-emerald-100 text-2xl font-bold text-emerald-600 transition-all duration-500 hover:-translate-y-2 px-8 border rounded-xl cursor-pointer"
@@ -247,9 +262,45 @@
       class="w-full h-screen bg-zinc-900 relative flex flex-col items-center justify-between overflow-hidden select-none"
     >
       <div class="absolute top-0 right-0 p-2 flex gap-4 z-99">
-        <button><svg class="w-6 h-6 cursor-pointer text-white/20 hover:-rotate-10 hover:text-white scale-120 duraiton-500 transition-all lucide lucide-volume2-icon lucide-volume-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.364 18.364a9 9 0 0 0 0-12.728"/></svg></button>
-        <button id="btn-newhand"><svg class="w-6 h-6 cursor-pointer text-white/20 hover:scale-[120%] hover:text-white scale-120 duraiton-500 transition-all lucide lucide-scan-icon lucide-scan" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg></button>
-
+        <button>
+          <svg
+            class="w-6 h-6 cursor-pointer text-white/20 hover:-rotate-10 hover:text-white scale-120 duraiton-500 transition-all lucide lucide-volume2-icon lucide-volume-2"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M11 4.702a.705.705 0 0 0-1.203-.498L6.413 7.587A1.4 1.4 0 0 1 5.416 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.416a1.4 1.4 0 0 1 .997.413l3.383 3.384A.705.705 0 0 0 11 19.298z"
+            />
+            <path d="M16 9a5 5 0 0 1 0 6" />
+            <path d="M19.364 18.364a9 9 0 0 0 0-12.728" />
+          </svg>
+        </button>
+        <button id="btn-newhand">
+          <svg
+            class="w-6 h-6 cursor-pointer text-white/20 hover:scale-[120%] hover:text-white scale-120 duraiton-500 transition-all lucide lucide-scan-icon lucide-scan"
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M3 7V5a2 2 0 0 1 2-2h2" />
+            <path d="M17 3h2a2 2 0 0 1 2 2v2" />
+            <path d="M21 17v2a2 2 0 0 1-2 2h-2" />
+            <path d="M7 21H5a2 2 0 0 1-2-2v-2" />
+          </svg>
+        </button>
       </div>
       <div class="absolute inset-0 bg-pan opacity-5"></div>
       <div class="absolute inset-0 bg-rose-200 opacity-5"></div>
@@ -285,9 +336,20 @@
           ></div>
         </div>
 
-        <h1 data-seat-label="1" class="text-white hover:scale-120 duration-500 transition-all">player2 • ※1205p</h1>
-        <span data-seat-odds="1" class="hidden mt-1 px-3 py-1 rounded-md bg-neutral-700/80 text-white text-[10px] tracking-[0.3em] shadow-lg"></span>
-        <span data-seat-bet="1" class="hidden mt-1 px-3 py-1 rounded-full bg-emerald-200 text-emerald-900 text-[10px] tracking-[0.3em] shadow-lg"></span>
+        <h1
+          data-seat-label="1"
+          class="text-white hover:scale-120 duration-500 transition-all"
+        >
+          player2 • ※1205p
+        </h1>
+        <span
+          data-seat-odds="1"
+          class="hidden mt-1 px-3 py-1 rounded-md bg-neutral-700/80 text-white text-[10px] tracking-[0.3em] shadow-lg"
+        ></span>
+        <span
+          data-seat-bet="1"
+          class="hidden mt-1 px-3 py-1 rounded-full bg-emerald-200 text-emerald-900 text-[10px] tracking-[0.3em] shadow-lg"
+        ></span>
         <span data-seat-dealer="1" class="dealer-chip hidden mt-1">D</span>
       </div>
       <div
@@ -320,11 +382,21 @@
               class="npc-card bg-no-repeat bg-cover p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border rotate-10"
             ></div>
           </div>
-          <h1 data-seat-label="2" class="text-white hover:scale-120 duration-500 transition-all">player3 • ※1205p</h1>
-          <span data-seat-odds="2" class="hidden mt-1 px-3 py-1 rounded-md bg-neutral-700/80 text-white text-[10px] tracking-[0.3em] shadow-lg"></span>
-          <span data-seat-bet="2" class="hidden mt-1 px-3 py-1 rounded-full bg-emerald-200 text-emerald-900 text-[10px] tracking-[0.3em] shadow-lg"></span>
+          <h1
+            data-seat-label="2"
+            class="text-white hover:scale-120 duration-500 transition-all"
+          >
+            player3 • ※1205p
+          </h1>
+          <span
+            data-seat-odds="2"
+            class="hidden mt-1 px-3 py-1 rounded-md bg-neutral-700/80 text-white text-[10px] tracking-[0.3em] shadow-lg"
+          ></span>
+          <span
+            data-seat-bet="2"
+            class="hidden mt-1 px-3 py-1 rounded-full bg-emerald-200 text-emerald-900 text-[10px] tracking-[0.3em] shadow-lg"
+          ></span>
           <span data-seat-dealer="2" class="dealer-chip hidden mt-1">D</span>
-
         </div>
       </div>
       <div
@@ -357,11 +429,21 @@
               class="npc-card bg-no-repeat bg-cover p-2 cursor-pointer rounded-sm hover:scale-[115%] hover:z-99 hover:rotate-0 transition-all duration-500 bg-white w-[50px] h-[72px] shadow-xl ring-3 ring-offset-4 ring-offset-white border rotate-10"
             ></div>
           </div>
-          <h1 data-seat-label="3" class="text-white hover:scale-120 duration-500 transition-all">player1 • ※1205p</h1>
-          <span data-seat-odds="3" class="hidden mt-1 px-3 py-1 rounded-md bg-neutral-700/80 text-white text-[10px] tracking-[0.3em] shadow-lg"></span>
-          <span data-seat-bet="3" class="hidden mt-1 px-3 py-1 rounded-full bg-emerald-200 text-emerald-900 text-[10px] tracking-[0.3em] shadow-lg"></span>
+          <h1
+            data-seat-label="3"
+            class="text-white hover:scale-120 duration-500 transition-all"
+          >
+            player1 • ※1205p
+          </h1>
+          <span
+            data-seat-odds="3"
+            class="hidden mt-1 px-3 py-1 rounded-md bg-neutral-700/80 text-white text-[10px] tracking-[0.3em] shadow-lg"
+          ></span>
+          <span
+            data-seat-bet="3"
+            class="hidden mt-1 px-3 py-1 rounded-full bg-emerald-200 text-emerald-900 text-[10px] tracking-[0.3em] shadow-lg"
+          ></span>
           <span data-seat-dealer="3" class="dealer-chip hidden mt-1">D</span>
-
         </div>
       </div>
 
@@ -379,22 +461,24 @@
             + ※0p
           </h1>
         </div>
-        <div
-          class="absolute left-6 top-[-24px] flex items-center gap-4 z-60"
-        >
+        <div class="absolute left-6 top-[-24px] flex items-center gap-4 z-60">
           <div class="flex flex-col items-center gap-1">
             <div
               id="deck-pile"
               class="w-[90px] h-[130px] bg-white rounded-lg shadow-xl ring-3 ring-offset-2 ring-offset-white border"
             ></div>
-            <span class="text-[10px] tracking-[0.25em] text-white/80">DECK</span>
+            <span class="text-[10px] tracking-[0.25em] text-white/80"
+              >DECK</span
+            >
           </div>
           <div class="flex flex-col items-center gap-1">
             <div
               id="burn-pile"
               class="w-[90px] h-[130px] bg-white rounded-lg shadow-xl ring-3 ring-offset-2 ring-offset-white border"
             ></div>
-            <span class="text-[10px] tracking-[0.25em] text-white/80">BURN</span>
+            <span class="text-[10px] tracking-[0.25em] text-white/80"
+              >BURN</span
+            >
           </div>
         </div>
         <div class="flex items-center justify-center gap-4">
@@ -489,23 +573,35 @@
             id="hand-1"
             class="card p-2 cursor-pointer rounded-xl hover:-translate-y-10 transition-all duration-500 bg-white w-[250px] h-[360px] shadow-xl ring-5 ring-offset-4 ring-offset-white border -rotate-10"
           ></div>
-         
+
           <div
             id="hand-2"
             class="card p-2 cursor-pointer rounded-xl hover:-translate-y-10 transition-all duration-500 bg-white w-[250px] h-[360px] shadow-xl w-32 h-48 bg-white rounded-xl ring-5 ring-offset-4 ring-offset-white border rotate-10"
           ></div>
         </div>
         <div class="absolute top-[-50px] left-1/2 -translate-x-[420px] z-99">
-          <span data-seat-odds="0" class="hidden px-3 py-1 rounded-md bg-neutral-700/80 text-white text-xs tracking-[0.35em] shadow-lg"></span>
+          <span
+            data-seat-odds="0"
+            class="hidden px-3 py-1 rounded-md bg-neutral-700/80 text-white text-xs tracking-[0.35em] shadow-lg"
+          ></span>
         </div>
-        <span data-seat-bet="0" class="hidden absolute bottom-6 right-6 px-3 py-1 rounded-full bg-emerald-200 text-emerald-900 text-[10px] tracking-[0.3em] shadow-lg z-99"></span>
-        <span data-seat-dealer="0" class="dealer-chip hidden absolute bottom-[10%] left-1/2 -translate-x-1/2 z-99">D</span>
+        <span
+          data-seat-bet="0"
+          class="hidden absolute bottom-6 right-6 px-3 py-1 rounded-full bg-emerald-200 text-emerald-900 text-[10px] tracking-[0.3em] shadow-lg z-99"
+        ></span>
+        <span
+          data-seat-dealer="0"
+          class="dealer-chip hidden absolute bottom-[10%] left-1/2 -translate-x-1/2 z-99"
+          >D</span
+        >
         <div
           id="player-chip-label"
           data-seat-label="0"
           class="absolute bottom-2 left-6 px-5 py-2 rounded-full bg-black/50 border border-white/20 text-white text-sm tracking-[0.2em] shadow-xl z-99"
         ></div>
-        <div class="relative w-full z-99 flex items-end justify-between gap-4 px-8 pb-2">
+        <div
+          class="relative w-full z-99 flex items-end justify-between gap-4 px-8 pb-2"
+        >
           <button
             id="btn-fold"
             class="flex-1 py-6 ring-2 ring-black border-b-8 border border-zinc-300 bg-zinc-100 text-xl font-bold text-zinc-400 transition-all duration-500 hover:-translate-y-2 rounded-xl cursor-pointer"
@@ -526,7 +622,11 @@
                 value="0"
                 class="w-40 h-2 raise-input accent-emerald-300 cursor-pointer"
               />
-              <span id="raise-amount" class="text-white text-xs tracking-[0.2em]">Raise: 0</span>
+              <span
+                id="raise-amount"
+                class="text-white text-xs tracking-[0.2em]"
+                >Raise: 0</span
+              >
             </div>
             <button
               id="btn-raise"
@@ -551,6 +651,13 @@
             CALL
           </button>
         </div>
+
+        <button
+          id="play-btn-2"
+          class="p-4 hidden translate-x-1/2 z-99 right-1/2 ring-2 absolute bottom-0 ring-black border-b-8 border border-zinc-300 bg-zinc-100 text-2xl font-bold text-zinc-400 transition-all duration-500 hover:py-6 px-20 border rounded-t-xl bg-white cursor-pointer"
+        >
+          PLAY AGAIN
+        </button>
       </div>
     </div>
   </body>

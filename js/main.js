@@ -70,3 +70,19 @@ bindClick("btn-play-again", () => {
   controller.updateButtonState();
   controller.startHand();
 });
+
+bindClick("play-btn-2", () => {
+  // Reset the game state for a new game
+  state.setupPlayers();
+  ui.updateNpcLabels(state.players);
+  ui.updatePot(0, "");
+  ui.hideGameOver();
+  ui.hideOtherPlayBtn();
+  controller.updateButtonState();
+  controller.startHand();
+});
+
+bindClick("game-over-close-btn", () => {
+  ui.hideGameOver();
+  ui.showOtherPlayBtn();
+});
